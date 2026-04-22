@@ -9,7 +9,7 @@ rules:
   - apiGroups: [""]
     resources: ["*"]
     verbs: ["get", "watch", "list"]
-  - apiGroups: ["apps", "batch", "autoscaling", "networking.k8s.io", "storage.k8s.io", "policy", "rbac.authorization.k8s.io", "apiextensions.k8s.io", "admissionregistration.k8s.io"]
+  - apiGroups: ["apps", "batch", "autoscaling", "networking.k8s.io", "storage.k8s.io", "policy", "rbac.authorization.k8s.io", "apiextensions.k8s.io", "admissionregistration.k8s.io", "argoproj.io"]
     resources: ["*"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["coordination.k8s.io"]
