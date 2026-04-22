@@ -1,0 +1,45 @@
+name: Build and push Helm chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'chart/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Package chart
+        id: package
+        run: |
+          helm package chart/
+          CHART_FILE=$(ls *.tgz)
+          echo "file=${CHART_FILE}" >> $GITHUB_OUTPUT
+          VERSION=$(helm show chart chart/ | grep '^version:' | awk '{print $2}')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Push chart to GHCR OCI
+        run: |
+          helm push ${{ steps.package.outputs.file }} oci://ghcr.io/${{ github.repository_owner }}/charts
+
+      - name: Summary
+        run: |
+          echo "### Chart published" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** \`${{ steps.package.outputs.file }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**OCI ref:** \`oci://ghcr.io/${{ github.repository_owner }}/charts/kubernetes-event-exporter:${{ steps.package.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY

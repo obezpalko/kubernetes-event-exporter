@@ -1,0 +1,68 @@
+replicaCount: 1
+
+image:
+  registry: ghcr.io
+  repository: obezpalko/kubernetes-event-exporter
+  tag: ""
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+config:
+  logLevel: warn
+  logFormat: json
+  metricsNamePrefix: event_exporter_
+  receivers:
+    - name: "stdout"
+      stdout: {}
+  route:
+    routes:
+      - match:
+          - receiver: "stdout"
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "2112"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  readOnlyRootFilesystem: true
+
+metrics:
+  enabled: true
+  port: 2112
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: ""
+    labels: {}
+    relabelings: []
+    metricRelabelings: []
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+priorityClassName: ""

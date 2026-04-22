@@ -1,0 +1,65 @@
+name: Sync upstream releases
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.check.outputs.new_tag }}
+      has_new: ${{ steps.check.outputs.has_new }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: Check for new upstream release
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          UPSTREAM=$(gh release view --repo resmoio/kubernetes-event-exporter --json tagName -q .tagName)
+          echo "Upstream latest: ${UPSTREAM}"
+          if git tag | grep -qx "${UPSTREAM}"; then
+            echo "has_new=false" >> $GITHUB_OUTPUT
+            echo "Already have ${UPSTREAM}"
+          else
+            echo "has_new=true" >> $GITHUB_OUTPUT
+            echo "new_tag=${UPSTREAM}" >> $GITHUB_OUTPUT
+            echo "New release found: ${UPSTREAM}"
+          fi
+
+  build:
+    needs: check
+    if: needs.check.outputs.has_new == 'true'
+    uses: ./.github/workflows/docker.yaml
+    with:
+      upstream_tag: ${{ needs.check.outputs.new_tag }}
+    permissions:
+      contents: read
+      packages: write
+
+  tag:
+    needs: [check, build]
+    if: needs.check.outputs.has_new == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ needs.check.outputs.new_tag }}
+          git push origin ${{ needs.check.outputs.new_tag }}
