@@ -19,6 +19,7 @@ on:
 
 env:
   IMAGE: ghcr.io/obezpalko/kubernetes-event-exporter
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   prepare:
