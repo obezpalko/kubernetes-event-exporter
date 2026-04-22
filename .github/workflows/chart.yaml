@@ -3,7 +3,7 @@ name: Build and push Helm chart
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'chart/**'
   workflow_dispatch:
