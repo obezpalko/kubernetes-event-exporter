@@ -2,7 +2,7 @@ apiVersion: v2
 name: kubernetes-event-exporter
 description: Export Kubernetes events to multiple destinations with routing and filtering
 type: application
-version: 0.1.3
+version: 0.1.4
 appVersion: "1.7"
 home: https://github.com/resmoio/kubernetes-event-exporter
 sources:
