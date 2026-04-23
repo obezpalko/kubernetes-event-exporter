@@ -1,12 +1,6 @@
 name: Build and push Helm chart
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'chart/**'
-  workflow_dispatch:
   workflow_call:
 
 permissions:

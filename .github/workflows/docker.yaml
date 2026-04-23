@@ -1,15 +1,6 @@
 name: Build and push Docker image
 
 on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
-    inputs:
-      upstream_tag:
-        description: 'Upstream resmoio/kubernetes-event-exporter tag to build (e.g. v1.7)'
-        required: true
-        default: 'v1.7'
   workflow_call:
     inputs:
       upstream_tag:
@@ -31,7 +22,7 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          TAG="${{ inputs.upstream_tag || github.event.inputs.upstream_tag || github.ref_name }}"
+          TAG="${{ inputs.upstream_tag }}"
           VERSION="${TAG#v}"
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
@@ -99,7 +90,7 @@ jobs:
           echo "${HASH#sha256:}" > /tmp/digests/${{ matrix.platform }}.digest
 
       - name: Upload digest
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: digest-${{ matrix.platform }}
           path: /tmp/digests/${{ matrix.platform }}.digest
@@ -114,7 +105,7 @@ jobs:
       packages: write
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
           pattern: digest-*
