@@ -1,4 +1,4 @@
-FROM golang:1.26.2 AS builder
+FROM golang:1.26.2-alpine3.23 AS builder
 
 ARG VERSION=dev
 ARG TARGETOS=linux
