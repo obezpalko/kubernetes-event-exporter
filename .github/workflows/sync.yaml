@@ -103,7 +103,7 @@ jobs:
           git push origin ${{ needs.check.outputs.new_tag }}
 
   update-chart:
-    needs: [check, tag]
+    needs: [check, scan, tag]
     if: needs.check.outputs.has_new == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -137,3 +137,11 @@ jobs:
           git add chart/Chart.yaml
           git commit -m "chore: bump chart appVersion to ${{ needs.check.outputs.new_tag }}"
           git push origin master
+
+  publish-chart:
+    needs: [check, update-chart]
+    if: needs.check.outputs.has_new == 'true'
+    uses: ./.github/workflows/chart.yaml
+    permissions:
+      contents: read
+      packages: write
